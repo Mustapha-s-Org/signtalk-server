@@ -9,6 +9,15 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_NAME: signtalk-edf-server # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: '16.x' # set this to the node version to use
+
+permissions:
+  contents: read
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,11 +28,20 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v1
         with:
-          node-version: '18.x'
-
+          node-version: '16.x'
+          
+      - name: create env file
+        run: |
+          touch .env
+          echo PORT=${{ secrets.PORT }} >> .env
+          echo MONGO_URI=${{ secrets.MONGO_URI }} >> .env
+          echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
+          echo DAILY_API_KEY=${{ secrets.DAILY_API_KEY }} >> .env
+          echo DAILY_ROOM_ID=${{ secrets.DAILY_ROOM_ID }} >> .env
+          
       - name: npm install, build, and test
         run: |
-          npm install
+          npm install --force
           npm run build --if-present
           npm run test --if-present
 
